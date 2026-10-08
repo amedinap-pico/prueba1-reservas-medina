@@ -39,4 +39,73 @@ void main() {
     expect(resultado.mensaje, 'La hora de fin debe ser posterior a la de inicio');
     expect(repositorio.reservas, isEmpty);
   });
+
+  test('rechaza un solapamiento parcial en la misma sala', () async {
+    await repositorio.guardar(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u1',
+      inicio: hora(10),
+      fin: hora(11),
+    ));
+
+    final resultado = await crearReserva(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u2',
+      inicio: hora(9, 30),
+      fin: hora(10, 30),
+    ));
+
+    expect(resultado.aceptada, isFalse);
+    expect(
+      resultado.mensaje,
+      'La sala ya se encuentra reservada en el horario seleccionado.',
+    );
+    expect(repositorio.reservas, hasLength(1));
+  });
+
+  test('rechaza un solapamiento total en la misma sala', () async {
+    await repositorio.guardar(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u1',
+      inicio: hora(10),
+      fin: hora(11),
+    ));
+
+    final resultado = await crearReserva(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u2',
+      inicio: hora(9),
+      fin: hora(12),
+    ));
+
+    expect(resultado.aceptada, isFalse);
+    expect(
+      resultado.mensaje,
+      'La sala ya se encuentra reservada en el horario seleccionado.',
+    );
+    expect(repositorio.reservas, hasLength(1));
+  });
+
+  test('rechaza una reserva contenida en otra de la misma sala', () async {
+    await repositorio.guardar(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u1',
+      inicio: hora(9),
+      fin: hora(12),
+    ));
+
+    final resultado = await crearReserva(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u2',
+      inicio: hora(10),
+      fin: hora(11),
+    ));
+
+    expect(resultado.aceptada, isFalse);
+    expect(
+      resultado.mensaje,
+      'La sala ya se encuentra reservada en el horario seleccionado.',
+    );
+    expect(repositorio.reservas, hasLength(1));
+  });
 }
