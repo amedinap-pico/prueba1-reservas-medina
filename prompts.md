@@ -1,4 +1,4 @@
-# Prompts de la sesión
+# Prompts de la prueba
 
 ## 1
 
