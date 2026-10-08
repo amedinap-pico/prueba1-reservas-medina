@@ -108,4 +108,42 @@ void main() {
     );
     expect(repositorio.reservas, hasLength(1));
   });
+
+  test('acepta reservas consecutivas en la misma sala', () async {
+    await repositorio.guardar(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u1',
+      inicio: hora(10),
+      fin: hora(11),
+    ));
+
+    final resultado = await crearReserva(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u2',
+      inicio: hora(11),
+      fin: hora(12),
+    ));
+
+    expect(resultado.aceptada, isTrue);
+    expect(repositorio.reservas, hasLength(2));
+  });
+
+  test('acepta el mismo horario cuando es otra sala', () async {
+    await repositorio.guardar(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u1',
+      inicio: hora(10),
+      fin: hora(11),
+    ));
+
+    final resultado = await crearReserva(SolicitudReserva(
+      salaId: 'Sala B',
+      usuarioId: 'u2',
+      inicio: hora(10),
+      fin: hora(11),
+    ));
+
+    expect(resultado.aceptada, isTrue);
+    expect(repositorio.reservas, hasLength(2));
+  });
 }
